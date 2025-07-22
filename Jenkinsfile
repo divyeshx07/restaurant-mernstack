@@ -7,11 +7,13 @@ pipeline {
     FRONTEND_IMAGE = "${DOCKER_HUB}/restaurant-frontend:01"
   }
 
-stage('Checkout') {
-  steps {
-    git branch: 'main', url: 'https://github.com/divyeshx07/restaurant-mernstack.git'
-  }
-}
+  stages {
+
+    stage('Checkout') {
+      steps {
+        git branch: 'main', url: 'https://github.com/divyeshx07/restaurant-mernstack.git'
+      }
+    }
 
     stage('Build Backend Docker Image') {
       steps {
@@ -51,5 +53,5 @@ stage('Checkout') {
       }
     }
 
-  }
-}
+  } // <- closes stages
+} // <- closes pipeline
