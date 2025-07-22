@@ -10,7 +10,8 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git 'https://github.com/divyeshx07/restaurant-mernstack.git'
+        git branch: 'main',
+            url: 'https://github.com/divyeshx07/restaurant-mernstack.git'
       }
     }
 
