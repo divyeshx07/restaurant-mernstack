@@ -3,8 +3,8 @@ pipeline {
 
   environment {
     DOCKER_HUB = 'divyeshh07'
-    BACKEND_IMAGE = "${DOCKER_HUB}/restaurant-backend:latest"
-    FRONTEND_IMAGE = "${DOCKER_HUB}/restaurant-frontend:latest"
+    BACKEND_IMAGE = "${divyeshh07}/restaurant-backend:01"
+    FRONTEND_IMAGE = "$divyeshh07}/restaurant-frontend:01"
   }
 
   stages {
@@ -18,7 +18,7 @@ pipeline {
     stage('Build Backend Docker Image') {
       steps {
         script {
-          docker.build("${BACKEND_IMAGE}", './backend')
+          docker.build("${divyeshh07/restaurant-backend:01}", './backend')
         }
       }
     }
@@ -26,7 +26,7 @@ pipeline {
     stage('Build Frontend Docker Image') {
       steps {
         script {
-          docker.build("${FRONTEND_IMAGE}", './frontend')
+          docker.build("${divyeshh07/restaurant-frontend:01}", './frontend')
         }
       }
     }
@@ -35,13 +35,13 @@ pipeline {
       steps {
         withCredentials([usernamePassword(
           credentialsId: 'dockerhub-credentials',
-          usernameVariable: 'DOCKER_USER',
-          passwordVariable: 'DOCKER_PASS'
+          usernameVariable: 'divyeshh07',
+          passwordVariable: 'Divyesh@07'
         )]) {
           script {
             sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-            sh "docker push ${BACKEND_IMAGE}"
-            sh "docker push ${FRONTEND_IMAGE}"
+            sh "docker push ${divyeshh07/restaurant-backend:01}"
+            sh "docker push ${divyeshh07/restaurant-frontend:01}"
           }
         }
       }
@@ -50,7 +50,7 @@ pipeline {
     stage('Run Backend Container') {
       steps {
         script {
-          sh "docker run -d --name restaurant-backend -p 7000:7000 ${BACKEND_IMAGE}"
+          sh "docker run -d --name restaurant-backend -p 7000:7000 ${divyeshh07/restaurant-backend:01}"
         }
       }
     }
@@ -58,7 +58,7 @@ pipeline {
     stage('Run Frontend Container') {
       steps {
         script {
-          sh "docker run -d --name restaurant-frontend -p 2000:80 ${FRONTEND_IMAGE}"
+          sh "docker run -d --name restaurant-frontend -p 2000:80 ${divyeshh07/restaurant-frontend:01}"
         }
       }
     }
