@@ -2,23 +2,21 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_HUB = 'divyeshh07'
-    BACKEND_IMAGE = "${DOCKER_HUB}/restaurant-backend:01"
-    FRONTEND_IMAGE = "${DOCKER_HUB}/restaurant-frontend:01"
+    BACKEND_IMAGE = 'divyeshh07/restaurant-backend:01'
+    FRONTEND_IMAGE = 'divyeshh07/restaurant-frontend:01'
   }
 
   stages {
     stage('Checkout') {
       steps {
-        git branch: 'main',
-            url: 'https://github.com/divyeshx07/restaurant-mernstack.git'
+        git branch: 'main', url: 'https://github.com/divyeshx07/restaurant-mernstack.git'
       }
     }
 
     stage('Build Backend Docker Image') {
       steps {
         script {
-          docker.build("${BACKEND_IMAGE}", './backend')
+          bat "docker build -t ${BACKEND_IMAGE} ./backend"
         }
       }
     }
@@ -26,33 +24,29 @@ pipeline {
     stage('Build Frontend Docker Image') {
       steps {
         script {
-          docker.build("${FRONTEND_IMAGE}", './frontend')
+          bat "docker build -t ${FRONTEND_IMAGE} ./frontend"
         }
       }
     }
 
     stage('Run Backend Container') {
-  steps {
-    script {
-      // Stop old container if running
-      bat 'docker stop restaurant-backend || exit 0'
-      bat 'docker rm restaurant-backend || exit 0'
-      // Run new container
-      bat "docker run -d --name restaurant-backend -p 7000:7000 ${BACKEND_IMAGE}"
+      steps {
+        script {
+          bat 'docker stop restaurant-backend || exit 0'
+          bat 'docker rm restaurant-backend || exit 0'
+          bat "docker run -d --name restaurant-backend -p 7000:7000 ${BACKEND_IMAGE}"
+        }
+      }
     }
-  }
-}
 
     stage('Run Frontend Container') {
-  steps {
-    script {
-      // Stop old container if running
-      bat 'docker stop restaurant-frontend || exit 0'
-      bat 'docker rm restaurant-frontend || exit 0'
-      // Run new container
-      bat "docker run -d --name restaurant-frontend -p 2000:80 ${FRONTEND_IMAGE}"
+      steps {
+        script {
+          bat 'docker stop restaurant-frontend || exit 0'
+          bat 'docker rm restaurant-frontend || exit 0'
+          bat "docker run -d --name restaurant-frontend -p 2000:80 ${FRONTEND_IMAGE}"
+        }
+      }
     }
   }
-}
-}
 }
