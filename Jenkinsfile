@@ -34,7 +34,7 @@ pipeline {
     stage('Run Backend Container') {
       steps {
         script {
-          sh "docker run -d -p 7000:7000 ${BACKEND_IMAGE}"
+          bat "docker run -d -p 7000:7000 ${BACKEND_IMAGE}"
         }
       }
     }
@@ -42,7 +42,7 @@ pipeline {
     stage('Run Frontend Container') {
       steps {
         script {
-          sh "docker run -d -p 2000:80 ${FRONTEND_IMAGE}"
+          bat "docker run -d -p 2000:80 ${FRONTEND_IMAGE}"
         }
       }
     }
