@@ -32,12 +32,16 @@ pipeline {
     }
 
     stage('Run Backend Container') {
-      steps {
-        script {
-          bat "docker run -d -p 7000:7000 ${BACKEND_IMAGE}"
-        }
-      }
+  steps {
+    script {
+      // Stop old container if running
+      bat 'docker stop restaurant-backend || exit 0'
+      bat 'docker rm restaurant-backend || exit 0'
+      // Run new container
+      bat "docker run -d --name restaurant-backend -p 7000:7000 ${BACKEND_IMAGE}"
     }
+  }
+}
 
     stage('Run Frontend Container') {
       steps {
