@@ -3,15 +3,15 @@ pipeline {
 
   environment {
     DOCKER_HUB = 'divyeshh07'
-    BACKEND_IMAGE = "${DOCKER_HUB}/restaurant-backend:01"
-    FRONTEND_IMAGE = "${DOCKER_HUB}/restaurant-frontend:01"
+    BACKEND_IMAGE = "${DOCKER_HUB}/restaurant-backend:latest"
+    FRONTEND_IMAGE = "${DOCKER_HUB}/restaurant-frontend:latest"
   }
 
   stages {
 
     stage('Checkout') {
       steps {
-        git branch: 'main', url: 'https://github.com/divyeshx07/restaurant-mernstack.git'
+        checkout scm
       }
     }
 
@@ -33,7 +33,11 @@ pipeline {
 
     stage('Push Images to Docker Hub') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+        withCredentials([usernamePassword(
+          credentialsId: 'dockerhub-credentials',
+          usernameVariable: 'DOCKER_USER',
+          passwordVariable: 'DOCKER_PASS'
+        )]) {
           script {
             sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
             sh "docker push ${BACKEND_IMAGE}"
@@ -43,15 +47,20 @@ pipeline {
       }
     }
 
-    stage('Deploy to Kubernetes') {
+    stage('Run Backend Container') {
       steps {
         script {
-          sh "kubectl apply -f mongo-deployment.yaml"
-          sh "kubectl apply -f backend-deployment.yaml"
-          sh "kubectl apply -f frontend-deployment.yaml"
+          sh "docker run -d --name restaurant-backend -p 7000:7000 ${BACKEND_IMAGE}"
         }
       }
     }
 
-  } // <- closes stages
-} // <- closes pipeline
+    stage('Run Frontend Container') {
+      steps {
+        script {
+          sh "docker run -d --name restaurant-frontend -p 2000:80 ${FRONTEND_IMAGE}"
+        }
+      }
+    }
+  }
+}
