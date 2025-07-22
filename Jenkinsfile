@@ -2,23 +2,24 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_HUB = 'divyeshh07'
-    BACKEND_IMAGE = "${DOCKER_HUB}/restaurant-backend:01"
-    FRONTEND_IMAGE = "${DOCKER_HUB}/restaurant-frontend:01"
-  }
-
+  BUILD_ID = "${env.BUILD_ID}"
+  BACKEND_IMAGE = "divyeshh07/restaurant-backend:${BUILD_ID}"
+  FRONTEND_IMAGE = "divyeshh07/restaurant-frontend:${BUILD_ID}"
+}
+  
   stages {
 
     stage('Checkout') {
       steps {
-        git branch: 'main', url: 'https://github.com/divyeshx07/restaurant-mernstack.git'
+        git branch: 'main',
+            url: 'https://github.com/divyeshx07/restaurant-mernstack.git'
       }
     }
 
     stage('Build Backend Image') {
       steps {
         script {
-          bat "docker build -t ${BACKEND_IMAGE} ./backend"
+          docker.build("${BACKEND_IMAGE}", './backend')
         }
       }
     }
@@ -26,7 +27,20 @@ pipeline {
     stage('Build Frontend Image') {
       steps {
         script {
-          bat "docker build -t ${FRONTEND_IMAGE} ./frontend"
+          docker.build("${FRONTEND_IMAGE}", './frontend')
+        }
+      }
+    }
+
+    stage('Stop Old Containers') {
+      steps {
+        script {
+          sh '''
+          docker stop restaurant-backend || true
+          docker rm restaurant-backend || true
+          docker stop restaurant-frontend || true
+          docker rm restaurant-frontend || true
+          '''
         }
       }
     }
@@ -34,10 +48,7 @@ pipeline {
     stage('Run Backend Container') {
       steps {
         script {
-          bat 'docker stop restaurant-backend || exit 0'
-          bat 'docker rm restaurant-backend || exit 0'
-          bat "docker run -d --name restaurant-backend -p 7000:7000 ${BACKEND_IMAGE}"
-          bat "docker ps -a"
+          sh "docker run -d -p 7000:7000 --name restaurant-backend ${BACKEND_IMAGE}"
         }
       }
     }
@@ -45,31 +56,7 @@ pipeline {
     stage('Run Frontend Container') {
       steps {
         script {
-          bat 'docker stop restaurant-frontend || exit 0'
-          bat 'docker rm restaurant-frontend || exit 0'
-          bat "docker run -d --name restaurant-frontend -p 2000:80 ${FRONTEND_IMAGE}"
-          bat "docker ps -a"
-        }
-      }
-    }
-
-    stage('Push Images to Docker Hub') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          script {
-            bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
-            bat "docker push ${BACKEND_IMAGE}"
-            bat "docker push ${FRONTEND_IMAGE}"
-          }
-        }
-      }
-    }
-    
-    stage('Show Logs') {
-      steps {
-        script {
-          bat "docker logs restaurant-backend"
-          bat "docker logs restaurant-frontend"
+          sh "docker run -d -p 2000:80 --name restaurant-frontend ${FRONTEND_IMAGE}"
         }
       }
     }
