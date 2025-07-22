@@ -31,18 +31,6 @@ pipeline {
       }
     }
 
-    stage('Push Images to Docker Hub') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          script {
-            bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
-            bat "docker push ${BACKEND_IMAGE}"
-            bat "docker push ${FRONTEND_IMAGE}"
-          }
-        }
-      }
-    }
-
     stage('Run Backend Container') {
       steps {
         script {
@@ -65,6 +53,18 @@ pipeline {
       }
     }
 
+    stage('Push Images to Docker Hub') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          script {
+            bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
+            bat "docker push ${BACKEND_IMAGE}"
+            bat "docker push ${FRONTEND_IMAGE}"
+          }
+        }
+      }
+    }
+    
     stage('Show Logs') {
       steps {
         script {
@@ -73,6 +73,5 @@ pipeline {
         }
       }
     }
-
   }
 }
