@@ -44,11 +44,15 @@ pipeline {
 }
 
     stage('Run Frontend Container') {
-      steps {
-        script {
-          bat "docker run -d -p 2000:80 ${FRONTEND_IMAGE}"
-        }
-      }
+  steps {
+    script {
+      // Stop old container if running
+      bat 'docker stop restaurant-frontend || exit 0'
+      bat 'docker rm restaurant-frontend || exit 0'
+      // Run new container
+      bat "docker run -d --name restaurant-frontend -p 2000:80 ${FRONTEND_IMAGE}"
     }
   }
+}
+}
 }
