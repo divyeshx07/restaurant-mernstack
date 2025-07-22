@@ -2,11 +2,10 @@ pipeline {
   agent any
 
   environment {
-  BUILD_ID = "${env.BUILD_ID}"
-  BACKEND_IMAGE = "divyeshh07/restaurant-backend:${BUILD_ID}"
-  FRONTEND_IMAGE = "divyeshh07/restaurant-frontend:${BUILD_ID}"
-}
-  
+    BACKEND_IMAGE = "divyeshh07/restaurant-backend:01"
+    FRONTEND_IMAGE = "divyeshh07/restaurant-frontend:01"
+  }
+
   stages {
 
     stage('Checkout') {
@@ -19,7 +18,7 @@ pipeline {
     stage('Build Backend Image') {
       steps {
         script {
-          docker.build("${BACKEND_IMAGE}", './backend')
+          bat "docker build -t ${BACKEND_IMAGE} ./backend"
         }
       }
     }
@@ -27,7 +26,7 @@ pipeline {
     stage('Build Frontend Image') {
       steps {
         script {
-          docker.build("${FRONTEND_IMAGE}", './frontend')
+          bat "docker build -t ${FRONTEND_IMAGE} ./frontend"
         }
       }
     }
@@ -35,11 +34,11 @@ pipeline {
     stage('Stop Old Containers') {
       steps {
         script {
-          sh '''
-          docker stop restaurant-backend || true
-          docker rm restaurant-backend || true
-          docker stop restaurant-frontend || true
-          docker rm restaurant-frontend || true
+          bat '''
+          docker stop restaurant-backend || exit 0
+          docker rm restaurant-backend || exit 0
+          docker stop restaurant-frontend || exit 0
+          docker rm restaurant-frontend || exit 0
           '''
         }
       }
@@ -48,7 +47,7 @@ pipeline {
     stage('Run Backend Container') {
       steps {
         script {
-          sh "docker run -d -p 7000:7000 --name restaurant-backend ${BACKEND_IMAGE}"
+          bat "docker run -d -p 7000:7000 --name restaurant-backend ${BACKEND_IMAGE}"
         }
       }
     }
@@ -56,7 +55,7 @@ pipeline {
     stage('Run Frontend Container') {
       steps {
         script {
-          sh "docker run -d -p 2000:80 --name restaurant-frontend ${FRONTEND_IMAGE}"
+          bat "docker run -d -p 2000:80 --name restaurant-frontend ${FRONTEND_IMAGE}"
         }
       }
     }
