@@ -2,18 +2,20 @@ pipeline {
   agent any
 
   environment {
-    BACKEND_IMAGE = 'divyeshh07/restaurant-backend:01'
-    FRONTEND_IMAGE = 'divyeshh07/restaurant-frontend:01'
+    DOCKER_HUB = 'divyeshh07'
+    BACKEND_IMAGE = "${DOCKER_HUB}/restaurant-backend:01"
+    FRONTEND_IMAGE = "${DOCKER_HUB}/restaurant-frontend:01"
   }
 
   stages {
+
     stage('Checkout') {
       steps {
         git branch: 'main', url: 'https://github.com/divyeshx07/restaurant-mernstack.git'
       }
     }
 
-    stage('Build Backend Docker Image') {
+    stage('Build Backend Image') {
       steps {
         script {
           bat "docker build -t ${BACKEND_IMAGE} ./backend"
@@ -21,10 +23,22 @@ pipeline {
       }
     }
 
-    stage('Build Frontend Docker Image') {
+    stage('Build Frontend Image') {
       steps {
         script {
           bat "docker build -t ${FRONTEND_IMAGE} ./frontend"
+        }
+      }
+    }
+
+    stage('Push Images to Docker Hub') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          script {
+            bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
+            bat "docker push ${BACKEND_IMAGE}"
+            bat "docker push ${FRONTEND_IMAGE}"
+          }
         }
       }
     }
@@ -35,6 +49,7 @@ pipeline {
           bat 'docker stop restaurant-backend || exit 0'
           bat 'docker rm restaurant-backend || exit 0'
           bat "docker run -d --name restaurant-backend -p 7000:7000 ${BACKEND_IMAGE}"
+          bat "docker ps -a"
         }
       }
     }
@@ -45,8 +60,19 @@ pipeline {
           bat 'docker stop restaurant-frontend || exit 0'
           bat 'docker rm restaurant-frontend || exit 0'
           bat "docker run -d --name restaurant-frontend -p 2000:80 ${FRONTEND_IMAGE}"
+          bat "docker ps -a"
         }
       }
     }
+
+    stage('Show Logs') {
+      steps {
+        script {
+          bat "docker logs restaurant-backend"
+          bat "docker logs restaurant-frontend"
+        }
+      }
+    }
+
   }
 }
